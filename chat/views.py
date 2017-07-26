@@ -11,10 +11,17 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from .models import *
 def index(request):
-    user_list = User.objects.all()
     room_list = Room.objects.all()
     context = {
-    'user_list' : user_list,
-    'room_list' : room_list,
+        'room_list' : room_list,
     }
     return render(request, 'chat/index.html', context)
+
+def chatroom(request,room_id):
+    users = UserRoom.objects.filter(room_id=room_id)
+    room = Room.objects.get(pk=room_id)
+    context = {
+        'users' : users,
+	'room' : room,
+    }
+    return render(request, 'chat/room.html', context)

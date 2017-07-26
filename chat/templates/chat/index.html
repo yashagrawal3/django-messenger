@@ -1,7 +1,10 @@
-{%for i in user_list%}
-{{i}}
-{%endfor%}
-
 {%for i in room_list%}
-{{i}}
+    Room-- {{i}}
+	<br>
+	{{i.groups.all}}
+    users--
+    {%for j in i.groups.all%}
+    {{j}}
+    {%endfor%}
+
 {%endfor%}
