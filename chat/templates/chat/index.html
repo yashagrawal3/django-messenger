@@ -1,10 +1,5 @@
-{%for i in room_list%}
-    Room-- {{i}}
-	<br>
-	{{i.groups.all}}
-    users--
-    {%for j in i.groups.all%}
-    {{j}}
-    {%endfor%}
-
+<h1> Rooms</h1>
+{%for i in user_list%}
+ {{i}} :::: <a href="">Chat</a>
+ <br>
 {%endfor%}

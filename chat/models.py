@@ -6,12 +6,13 @@ from django.contrib.auth.models import User
 
 @python_2_unicode_compatible
 class Room(models.Model):
-    room_name = models.CharField(max_length=20)
-    groups = models.ManyToManyField(User, through='UserRoom')
+    room_name = models.CharField(max_length=10, unique=True)
+    messages = models.ManyToManyField(User, through='Message')
     def __str__(self):
 	return self.room_name
 
-class UserRoom(models.Model):
+class Message(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.CharField(max_length=20)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)

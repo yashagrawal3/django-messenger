@@ -10,18 +10,37 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from .models import *
+
 def index(request):
-    room_list = Room.objects.all()
+    user_list = User.objects.all()
     context = {
-        'room_list' : room_list,
+        'user_list' : user_list,
     }
     return render(request, 'chat/index.html', context)
 
+def messages(request):
+    chats = Message.objects.filter(user=request.user)
+    context = {
+	'chats' : chats,
+    }
+    return render(request,'chat/messages.html',context)
+
 def chatroom(request,room_id):
-    users = UserRoom.objects.filter(room_id=room_id)
+    users = Message.objects.filter(room_id=room_id)
     room = Room.objects.get(pk=room_id)
     context = {
         'users' : users,
 	'room' : room,
     }
     return render(request, 'chat/room.html', context)
+'''
+def chatroom(request, label):
+    room, created = Room.objects.get_or_create(label=label)
+
+    messages = reversed(room.messages.order_by('-timestamp')[:50])
+
+    return render(request, "chat/room.html", {
+        'room': room,
+        'messages': messages,
+    })
+'''
