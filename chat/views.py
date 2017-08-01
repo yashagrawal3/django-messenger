@@ -19,18 +19,25 @@ def index(request):
     return render(request, 'chat/index.html', context)
 
 def messages(request):
-    chats = Message.objects.filter(user=request.user)
+    chats = Link.objects.filter(user=request.user)
     context = {
 	'chats' : chats,
     }
     return render(request,'chat/messages.html',context)
 
 def chatroom(request,room_id):
-    users = Message.objects.filter(room_id=room_id)
     room = Room.objects.get(pk=room_id)
+    links = Link.objects.filter(room_id=room_id)
+    messages = Message.objects.filter(links__room_id=room_id).order_by('timestamp')
+#messages = list()
+    #for i in links:
+#	msg = Message.objects.filter(links=i)
+#	messages += msg
+ #   messages = messages.order_by('-timestamp')	
     context = {
-        'users' : users,
+	'links' : links,
 	'room' : room,
+	'messages' : messages,
     }
     return render(request, 'chat/room.html', context)
 '''
