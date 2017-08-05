@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 
 LOGIN_REDIRECT_URL = 'messages'
 
+
 # Application definition
 
 INSTALLED_APPS = [

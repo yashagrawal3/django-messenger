@@ -14,12 +14,26 @@ from .forms import *
 
 def index(request):
     if request.user.is_authenticated():
-	return render(request, 'chat/messages.html')
+        chats = Link.objects.filter(user=request.user)
+        users = list()
+        for i in chats:
+            r = i.room
+            part = Link.objects.filter(room=r)
+            users+= part
+            myself = Link.objects.get(user=request.user,room=r)
+            users.remove(myself)    
+        context = {
+        'users' : users,
+        'chats' : chats,
+        }
+        return render(request,'chat/messages.html',context)
     else:
-	return render(request, 'chat/index.html')
+	   return render(request, 'chat/index.html')
     
 def contacts(request):
     if request.method == 'POST':
+        userimp = request.POST.get('user', '')
+        user = User.objects.get(username=userimp)
         form = LinkForm(request.POST)
         room_count = Room.objects.all().count()
         room_count +=1
@@ -28,15 +42,15 @@ def contacts(request):
             room_name = room_name,
         )
         room = Room.objects.get(room_name=room_name)
-        if form.is_valid():
-            linkobj = Link.objects.create(
-            room = room,
-            user =  form.cleaned_data['user'],
-            )        
+        linkobj = Link.objects.create(
+        room = room,
+        user =  user,
+        )
         context = {
             'form' :form,
+            'userr' : user,
         }
-        return render(request, 'chat/contacts.html', context)
+        return HttpResponseRedirect(reverse('contacts'))
 
     else:
         form = LinkForm(request.POST)
