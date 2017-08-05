@@ -10,10 +10,11 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from .models import *
+from .forms import *
 
 def index(request):
     if request.user.is_authenticated():
-	return redirect(messages)
+	return render(request, 'chat/messages.html')
     else:
 	return render(request, 'chat/index.html')
     
@@ -40,16 +41,31 @@ def messages(request):
     return render(request,'chat/messages.html',context)
 
 def chatroom(request,room_id):
-    room = Room.objects.get(pk=room_id)
-    links = Link.objects.filter(room_id=room_id)
-    messages = Message.objects.filter(links__room_id=room_id).order_by('timestamp')[:25]
-    context = {
-	'links' : links,
-	'room' : room,
-	'messages' : messages,
-    }
-    return render(request, 'chat/room.html', context)
-'''
+    if request.method == 'POST':
+        form = MsgForm(request.POST)
+        link = Link.objects.filter(room=room_id,user=request.user.id)
+        link_id = link[0]
+        if form.is_valid():
+            msgobj = Message.objects.create(
+                links = link_id,
+                message = form.cleaned_data['message'],
+            )
+            return HttpResponseRedirect(reverse('chatroom' , kwargs={'room_id': room_id}))
+        else :
+            return HttpResponse("Input Invalid")
+    else:
+        form = MsgForm()
+        room = Room.objects.get(pk=room_id)
+        links = Link.objects.filter(room_id=room_id)
+        messages = Message.objects.filter(links__room_id=room_id).order_by('timestamp')[:25]
+        context = {
+        'links' : links,
+        'room' : room,
+        'messages' : messages,
+        'form': form
+        }
+        return render(request, 'chat/room.html', context)
+    '''
 def chatroom(request, label):
     room, created = Room.objects.get_or_create(label=label)
 
