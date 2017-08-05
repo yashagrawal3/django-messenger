@@ -12,11 +12,17 @@ from django.template import RequestContext
 from .models import *
 
 def index(request):
+    if request.user.is_authenticated():
+	return redirect(messages)
+    else:
+	return render(request, 'chat/index.html')
+    
+def contacts(request):
     user_list = User.objects.all()
     context = {
         'user_list' : user_list,
     }
-    return render(request, 'chat/index.html', context)
+    return render(request, 'chat/contacts.html', context)
 
 def messages(request):
     chats = Link.objects.filter(user=request.user)

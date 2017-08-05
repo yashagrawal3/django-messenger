@@ -1,3 +1,7 @@
+<h3> Welcome {{user.get_username}}</h3>
 {%for i in users%}
-<a href ={% url 'chatroom' i.room_id %}>{{i.user}}</a>
+-------------------------------------<br>
+<a href ={% url 'chatroom' i.room_id %}>{{i.user}}</a><br>
+-------------------------------------<br>
 {%endfor%}
+</ul>
