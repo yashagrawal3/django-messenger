@@ -9,3 +9,8 @@ class MsgForm(forms.ModelForm):
 	class Meta:
 		model = Message
 		fields = ('message', )
+
+class LinkForm(forms.ModelForm):
+  class Meta:
+     model = Link
+     fields = ('user',)

@@ -19,21 +19,47 @@ def index(request):
 	return render(request, 'chat/index.html')
     
 def contacts(request):
-    user_list = User.objects.all()
-    context = {
-        'user_list' : user_list,
-    }
-    return render(request, 'chat/contacts.html', context)
+    if request.method == 'POST':
+        form = LinkForm(request.POST)
+        room_count = Room.objects.all().count()
+        room_count +=1
+        room_name = "R" + str(room_count)
+        roomobj = Room.objects.create(
+            room_name = room_name,
+        )
+        room = Room.objects.get(room_name=room_name)
+        if form.is_valid():
+            linkobj = Link.objects.create(
+            room = room,
+            user =  form.cleaned_data['user'],
+            )        
+        context = {
+            'form' :form,
+        }
+        return render(request, 'chat/contacts.html', context)
+
+    else:
+        form = LinkForm(request.POST)
+        users = User.objects.all()
+        user_list=list()
+        user_list+=users
+        myself = Link.objects.get(user=request.user).user
+        user_list.remove(myself)
+        context = {
+            'user_list' : user_list,
+            'form' : form, 
+        }
+        return render(request, 'chat/contacts.html', context)
 
 def messages(request):
     chats = Link.objects.filter(user=request.user)
     users = list()
     for i in chats:
-	r = i.room
-	part = Link.objects.filter(room=r)
-	users+= part
+    	r = i.room
+    	part = Link.objects.filter(room=r)
+    	users+= part
         myself = Link.objects.get(user=request.user,room=r)
-	users.remove(myself)	
+        users.remove(myself)	
     context = {
 	'users' : users,
 	'chats' : chats,
@@ -43,8 +69,7 @@ def messages(request):
 def chatroom(request,room_id):
     if request.method == 'POST':
         form = MsgForm(request.POST)
-        link = Link.objects.filter(room=room_id,user=request.user.id)
-        link_id = link[0]
+        link = Link.objects.get(room=room_id,user=request.user.id)
         if form.is_valid():
             msgobj = Message.objects.create(
                 links = link_id,
@@ -57,10 +82,18 @@ def chatroom(request,room_id):
         form = MsgForm()
         room = Room.objects.get(pk=room_id)
         links = Link.objects.filter(room_id=room_id)
+        users = list()
+        for i in links:
+            r = i.room
+            part = Link.objects.filter(room=r)
+            users+= part
+            myself = Link.objects.get(user=request.user,room=r)
+            users.remove(myself)
+        users = users[0]
         messages = Message.objects.filter(links__room_id=room_id).order_by('timestamp')[:25]
         context = {
         'links' : links,
-        'room' : room,
+        'users' : users,
         'messages' : messages,
         'form': form
         }
