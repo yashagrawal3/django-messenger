@@ -34,27 +34,31 @@ def contacts(request):
     if request.method == 'POST':
         userimp = request.POST.get('user', '')
         user = User.objects.get(username=userimp)
-        form = LinkForm(request.POST)
-        room_count = Room.objects.all().count()
-        room_count +=1
-        room_name = "R" + str(room_count)
-        roomobj = Room.objects.create(
-            room_name = room_name,
-        )
-        room = Room.objects.filter(room_name=room_name)[0]
-        room_id = room.id
-        linkobj = Link.objects.create(
-        room = room,
-        user =  user,
-        )
-        linkobj1 = Link.objects.create(
-        room = room,
-        user =  request.user,
-        )
-        context = {
-            'form' :form,
-            'userr' : user,
-        }
+        u1r = Link.objects.filter(user=request.user).values_list('room')
+        u2r = Link.objects.filter(user=user).values_list('room')
+        flag = False
+        for i in u1r:
+            if i in u2r:
+                room_id = i[0]
+                flag = True
+                break
+        if(flag==False):
+            room_count = Room.objects.all().count()
+            room_count +=1
+            room_name = "R" + str(room_count)
+            roomobj = Room.objects.create(
+                room_name = room_name,
+            )
+            room = Room.objects.filter(room_name=room_name)[0]
+            room_id = room.id
+            linkobj = Link.objects.create(
+            room = room,
+            user =  user,
+            )
+            linkobj1 = Link.objects.create(
+            room = room,
+            user =  request.user,
+            )
         return HttpResponseRedirect(reverse('chatroom' , kwargs={'room_id': room_id}))
 
 
