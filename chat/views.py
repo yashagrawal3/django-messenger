@@ -41,23 +41,29 @@ def contacts(request):
         roomobj = Room.objects.create(
             room_name = room_name,
         )
-        room = Room.objects.get(room_name=room_name)
+        room = Room.objects.filter(room_name=room_name)[0]
+        room_id = room.id
         linkobj = Link.objects.create(
         room = room,
         user =  user,
+        )
+        linkobj1 = Link.objects.create(
+        room = room,
+        user =  request.user,
         )
         context = {
             'form' :form,
             'userr' : user,
         }
-        return HttpResponseRedirect(reverse('contacts'))
+        return HttpResponseRedirect(reverse('chatroom' , kwargs={'room_id': room_id}))
+
 
     else:
         form = LinkForm(request.POST)
         users = User.objects.all()
         user_list=list()
         user_list+=users
-        myself = Link.objects.get(user=request.user).user
+        myself = User.objects.get(username=request.user.username)
         user_list.remove(myself)
         context = {
             'user_list' : user_list,
@@ -86,7 +92,7 @@ def chatroom(request,room_id):
         link = Link.objects.get(room=room_id,user=request.user.id)
         if form.is_valid():
             msgobj = Message.objects.create(
-                links = link_id,
+                links = link,
                 message = form.cleaned_data['message'],
             )
             return HttpResponseRedirect(reverse('chatroom' , kwargs={'room_id': room_id}))
